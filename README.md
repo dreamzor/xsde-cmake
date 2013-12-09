@@ -1,7 +1,7 @@
 xsde-cmake
 ==========
 
-*CMakeLists.txt for building CodeSynthesis XSD/e*
+CMakeLists.txt for building CodeSynthesis XSD/e runtime
 
 
 You can only download binaries/makefiles at XSD/e download page (http://www.codesynthesis.com/products/xsde/download.xhtml), so it becomes a mess if your project uses CMake: use different binaries for different platforms is pain. It's much more convenient to compile everything from sources. 
