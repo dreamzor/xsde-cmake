@@ -32,7 +32,7 @@ The source code in `libxsde` and example folder is open source and downloaded fr
 This is how to compile the .xsd file included as example:
    
     cd example-hybrid-hello
-    /somewhere/xsde-3.2.0-x86_64-linux-gnu/bin/xsde cxx-hybrid --generate-parser --generate-aggregate hello.xsd
+    /somewhere/xsde-3.2.0-x86_64-linux-gnu/bin/xsde cxx-hybrid --generate-parser --generate-aggregate --no-long-long hello.xsd
 
 which will generate:
 
