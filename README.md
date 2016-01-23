@@ -8,7 +8,11 @@ You can only download binaries/makefiles at XSD/e download page (http://www.code
 
 This is a mostly draft, but working CMakeLists.txt for CodeSynthresis XSD/e 3.2.0, rewritten from one of makefiles. Right now cxx-parser and cxx-hybrid are tested. 
 
-The source code in `libxsde` and example folder is open source and downloaded from http://www.codesynthesis.com/download/xsde/3.2/ with the addition of `config.h.in` file used to generate `config.h` file by CMake. 
+The source code in `libxsde` and example folder is open source and downloaded from 
+
+http://www.codesynthesis.com/download/xsde/3.2/ 
+
+File `config.h.in` is added there and used to generate `config.h` file during CMake building process.
 
 ### Building the library and example
 
