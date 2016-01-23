@@ -10,7 +10,7 @@ This is a mostly draft, but working CMakeLists.txt for CodeSynthresis XSD/e 3.2.
 
 The source code in `libxsde` and example folder is open source and downloaded from http://www.codesynthesis.com/download/xsde/3.2/ with the addition of `config.h.in` file used to generate `config.h` file by CMake. 
 
-### Build instructions
+### Building the library and example
 
     cd build
     cmake ..
