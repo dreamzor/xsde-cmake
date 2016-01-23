@@ -1,0 +1,661 @@
+root = ..\..
+
+!include $(root)\build\config.nmake
+!include $(root)\build\c\rules.nmake
+!include $(root)\build\cxx\rules.nmake
+
+EXTRA_CPPFLAGS = /I..
+
+#########################################################################
+
+src = c\expat\xmlparse.c c\expat\xmlrole.c c\expat\xmltok.c
+src = $(src) c\genx\genx.c c\genx\char-props.c
+
+!if "$(XSDE_PARSER_VALIDATION)$(XSDE_SERIALIZER_VALIDATION)" != "nn"
+!if "$(XSDE_REGEXP)" == "y"
+src = $(src) c\regexp\chvalid.c c\regexp\xmlunicode.c c\regexp\xmlregexp.c
+!endif
+!endif
+
+!if "$(XSDE_CUSTOM_ALLOCATOR)" == "y"
+!if "$(XSDE_DEFAULT_ALLOCATOR)" == "y"
+src = $(src) allocator.c
+!endif
+!endif
+
+src = $(src)          \
+cxx\string.cxx        \
+cxx\string-search.cxx \
+cxx\ro-string.cxx     \
+cxx\stack.cxx
+
+!if "$(XSDE_CUSTOM_ALLOCATOR)" == "y"
+!if "$(XSDE_EXCEPTIONS)" == "y"
+src = $(src) cxx/allocator.cxx
+!endif
+!endif
+
+!if "$(XSDE_ENCODING)" == "iso8859-1"
+src = $(src) cxx\iso8859-1.cxx
+!endif
+
+!if "$(XSDE_STL)" == "n"
+src = $(src) cxx\strdupx.cxx
+!endif
+
+!if "$(XSDE_EXCEPTIONS)" == "n"
+src = $(src) cxx\sys-error.cxx
+!endif
+
+!if "$(XSDE_PARSER_VALIDATION)$(XSDE_SERIALIZER_VALIDATION)" != "nn"
+src = $(src) cxx\schema-error.cxx
+!endif
+
+!if "$(XSDE_POLYMORPHIC)" == "y"
+src = $(src) cxx\hashmap.cxx
+!endif
+
+# Common data types.
+#
+src = $(src) cxx\buffer.cxx cxx\sequence-base.cxx
+
+!if "$(XSDE_STL)" == "y"
+src = $(src) cxx\string-sequence-stl.cxx
+!else
+src = $(src) cxx\qname.cxx cxx\string-sequence.cxx
+!endif
+
+
+## XML
+##
+!if "$(XSDE_PARSER_VALIDATION)$(XSDE_SERIALIZER_VALIDATION)" != "nn"
+src = $(src) cxx\xml\char-table.cxx cxx\xml\ncname.cxx
+!endif
+
+
+## C++/Hybrid
+##
+src = $(src)                   \
+cxx\hybrid\any-type.cxx        \
+cxx\hybrid\any-type-pimpl.cxx  \
+cxx\hybrid\any-type-pskel.cxx  \
+cxx\hybrid\any-type-simpl.cxx  \
+cxx\hybrid\any-type-sskel.cxx  \
+cxx\hybrid\sequence.cxx
+
+!if "$(XSDE_POLYMORPHIC)" == "y"
+src = $(src)                  \
+cxx\hybrid\parser-map.cxx     \
+cxx\hybrid\serializer-map.cxx
+!endif
+
+!if "$(XSDE_CDR)" == "y"
+src = $(src)                       \
+cxx\hybrid\cdr\exceptions.cxx      \
+cxx\hybrid\cdr\istream.cxx         \
+cxx\hybrid\cdr\ostream.cxx         \
+cxx\hybrid\cdr\qname.cxx           \
+cxx\hybrid\cdr\date-time.cxx       \
+cxx\hybrid\cdr\string-sequence.cxx
+!endif
+
+!if "$(XSDE_XDR)" == "y"
+src = $(src)                       \
+cxx\hybrid\xdr\exceptions.cxx      \
+cxx\hybrid\xdr\istream.cxx         \
+cxx\hybrid\xdr\ostream.cxx         \
+cxx\hybrid\xdr\qname.cxx           \
+cxx\hybrid\xdr\date-time.cxx       \
+cxx\hybrid\xdr\string-sequence.cxx
+!endif
+
+## C++/Parser
+##
+src = $(src) cxx\parser\elements.cxx
+src = $(src) cxx\parser\expat\document.cxx cxx\parser\expat\xml-error.cxx
+
+!if "$(XSDE_POLYMORPHIC)" == "y"
+src = $(src) cxx\parser\map.cxx cxx\parser\substitution-map.cxx
+!endif
+
+!if "$(XSDE_EXCEPTIONS)" == "y"
+src = $(src) cxx\parser\exceptions.cxx
+!else
+src = $(src) cxx\parser\error.cxx
+!endif
+
+# Parser implementations.
+#
+!if "$(XSDE_PARSER_VALIDATION)" == "y"
+
+src = $(src)                                    \
+cxx\parser\validating\parser.cxx                \
+cxx\parser\validating\time-zone.cxx             \
+cxx\parser\validating\string-common.cxx         \
+cxx\parser\validating\xml-schema-pskel.cxx
+
+!if "$(XSDE_POLYMORPHIC)" == "y"
+src = $(src) cxx\parser\validating\inheritance-map.cxx
+!endif
+
+src = $(src)                                    \
+cxx\parser\validating\boolean.cxx               \
+cxx\parser\validating\number.cxx                \
+cxx\parser\validating\byte.cxx                  \
+cxx\parser\validating\unsigned-byte.cxx         \
+cxx\parser\validating\short.cxx                 \
+cxx\parser\validating\unsigned-short.cxx        \
+cxx\parser\validating\int.cxx                   \
+cxx\parser\validating\unsigned-int.cxx          \
+cxx\parser\validating\integer.cxx               \
+cxx\parser\validating\negative-integer.cxx      \
+cxx\parser\validating\non-positive-integer.cxx  \
+cxx\parser\validating\positive-integer.cxx      \
+cxx\parser\validating\non-negative-integer.cxx  \
+cxx\parser\validating\float.cxx                 \
+cxx\parser\validating\double.cxx                \
+cxx\parser\validating\decimal.cxx
+
+!if "$(XSDE_LONGLONG)" == "y"
+src = $(src)                                    \
+cxx\parser\validating\long-long.cxx             \
+cxx\parser\validating\unsigned-long-long.cxx
+!else
+src = $(src)                                    \
+cxx\parser\validating\long.cxx                  \
+cxx\parser\validating\unsigned-long.cxx
+!endif
+
+!if "$(XSDE_STL)" == "y"
+
+src = $(src)                                    \
+cxx\parser\validating\any-simple-type-stl.cxx   \
+cxx\parser\validating\string-stl.cxx            \
+cxx\parser\validating\normalized-string-stl.cxx \
+cxx\parser\validating\token-stl.cxx             \
+cxx\parser\validating\name-stl.cxx              \
+cxx\parser\validating\nmtoken-stl.cxx           \
+cxx\parser\validating\nmtokens-stl.cxx          \
+cxx\parser\validating\ncname-stl.cxx            \
+cxx\parser\validating\id-stl.cxx                \
+cxx\parser\validating\idref-stl.cxx             \
+cxx\parser\validating\idrefs-stl.cxx            \
+cxx\parser\validating\language-stl.cxx          \
+cxx\parser\validating\uri-stl.cxx               \
+cxx\parser\validating\qname-stl.cxx
+
+!else
+
+src = $(src)                                 \
+cxx\parser\validating\any-simple-type.cxx    \
+cxx\parser\validating\string.cxx             \
+cxx\parser\validating\normalized-string.cxx  \
+cxx\parser\validating\token.cxx              \
+cxx\parser\validating\name.cxx               \
+cxx\parser\validating\nmtoken.cxx            \
+cxx\parser\validating\nmtokens.cxx           \
+cxx\parser\validating\ncname.cxx             \
+cxx\parser\validating\id.cxx                 \
+cxx\parser\validating\idref.cxx              \
+cxx\parser\validating\idrefs.cxx             \
+cxx\parser\validating\language.cxx           \
+cxx\parser\validating\uri.cxx                \
+cxx\parser\validating\qname.cxx
+
+!endif # stl
+
+src = $(src)                                 \
+cxx\parser\validating\base64-binary.cxx      \
+cxx\parser\validating\hex-binary.cxx         \
+cxx\parser\validating\gday.cxx               \
+cxx\parser\validating\gmonth.cxx             \
+cxx\parser\validating\gyear.cxx              \
+cxx\parser\validating\gmonth-day.cxx         \
+cxx\parser\validating\gyear-month.cxx        \
+cxx\parser\validating\date.cxx               \
+cxx\parser\validating\time.cxx               \
+cxx\parser\validating\date-time.cxx          \
+cxx\parser\validating\duration.cxx
+
+!else # validation
+
+src = $(src)                                        \
+cxx\parser\non-validating\parser.cxx                \
+cxx\parser\non-validating\time-zone.cxx             \
+cxx\parser\non-validating\string-common.cxx         \
+cxx\parser\non-validating\xml-schema-pskel.cxx
+
+src = $(src)                                        \
+cxx\parser\non-validating\boolean.cxx               \
+cxx\parser\non-validating\number.cxx                \
+cxx\parser\non-validating\byte.cxx                  \
+cxx\parser\non-validating\unsigned-byte.cxx         \
+cxx\parser\non-validating\short.cxx                 \
+cxx\parser\non-validating\unsigned-short.cxx        \
+cxx\parser\non-validating\int.cxx                   \
+cxx\parser\non-validating\unsigned-int.cxx          \
+cxx\parser\non-validating\integer.cxx               \
+cxx\parser\non-validating\negative-integer.cxx      \
+cxx\parser\non-validating\non-positive-integer.cxx  \
+cxx\parser\non-validating\positive-integer.cxx      \
+cxx\parser\non-validating\non-negative-integer.cxx  \
+cxx\parser\non-validating\float.cxx                 \
+cxx\parser\non-validating\double.cxx                \
+cxx\parser\non-validating\decimal.cxx
+
+!if "$(XSDE_LONGLONG)" == "y"
+src = $(src)                                        \
+cxx\parser\non-validating\long-long.cxx             \
+cxx\parser\non-validating\unsigned-long-long.cxx
+!else
+src = $(src)                                        \
+cxx\parser\non-validating\long.cxx                  \
+cxx\parser\non-validating\unsigned-long.cxx
+!endif
+
+!if "$(XSDE_STL)" == "y"
+
+src = $(src)                                        \
+cxx\parser\non-validating\any-simple-type-stl.cxx   \
+cxx\parser\non-validating\string-stl.cxx            \
+cxx\parser\non-validating\normalized-string-stl.cxx \
+cxx\parser\non-validating\token-stl.cxx             \
+cxx\parser\non-validating\name-stl.cxx              \
+cxx\parser\non-validating\nmtoken-stl.cxx           \
+cxx\parser\non-validating\nmtokens-stl.cxx          \
+cxx\parser\non-validating\ncname-stl.cxx            \
+cxx\parser\non-validating\id-stl.cxx                \
+cxx\parser\non-validating\idref-stl.cxx             \
+cxx\parser\non-validating\idrefs-stl.cxx            \
+cxx\parser\non-validating\language-stl.cxx          \
+cxx\parser\non-validating\uri-stl.cxx               \
+cxx\parser\non-validating\qname-stl.cxx
+
+!else
+
+src = $(src)                                     \
+cxx\parser\non-validating\any-simple-type.cxx    \
+cxx\parser\non-validating\string.cxx             \
+cxx\parser\non-validating\normalized-string.cxx  \
+cxx\parser\non-validating\token.cxx              \
+cxx\parser\non-validating\name.cxx               \
+cxx\parser\non-validating\nmtoken.cxx            \
+cxx\parser\non-validating\nmtokens.cxx           \
+cxx\parser\non-validating\ncname.cxx             \
+cxx\parser\non-validating\id.cxx                 \
+cxx\parser\non-validating\idref.cxx              \
+cxx\parser\non-validating\idrefs.cxx             \
+cxx\parser\non-validating\language.cxx           \
+cxx\parser\non-validating\uri.cxx                \
+cxx\parser\non-validating\qname.cxx
+
+!endif # stl
+
+src = $(src)                                     \
+cxx\parser\non-validating\base64-binary.cxx      \
+cxx\parser\non-validating\hex-binary.cxx         \
+cxx\parser\non-validating\gday.cxx               \
+cxx\parser\non-validating\gmonth.cxx             \
+cxx\parser\non-validating\gyear.cxx              \
+cxx\parser\non-validating\gmonth-day.cxx         \
+cxx\parser\non-validating\gyear-month.cxx        \
+cxx\parser\non-validating\date.cxx               \
+cxx\parser\non-validating\time.cxx               \
+cxx\parser\non-validating\date-time.cxx          \
+cxx\parser\non-validating\duration.cxx
+
+!endif # validation
+
+
+## C++/Serializer
+##
+src = $(src)                      \
+cxx\serializer\elements.cxx       \
+cxx\serializer\context.cxx
+
+src = $(src)                      \
+cxx\serializer\genx\document.cxx  \
+cxx\serializer\genx\xml-error.cxx
+
+!if "$(XSDE_POLYMORPHIC)" == "y"
+src = $(src) cxx\serializer\map.cxx cxx\serializer\substitution-map.cxx
+!endif
+
+!if "$(XSDE_EXCEPTIONS)" == "y"
+src = $(src) cxx\serializer\exceptions.cxx
+!else
+src = $(src) cxx\serializer\error.cxx
+!endif
+
+# Serializer implementations.
+#
+!if "$(XSDE_SERIALIZER_VALIDATION)" == "y"
+
+src = $(src)                                        \
+cxx\serializer\validating\serializer.cxx            \
+cxx\serializer\validating\time-zone.cxx             \
+cxx\serializer\validating\string-common.cxx         \
+cxx\serializer\validating\xml-schema-sskel.cxx
+
+!if "$(XSDE_POLYMORPHIC)" == "y"
+src = $(src) cxx\serializer\validating\inheritance-map.cxx
+!endif
+
+src = $(src)                                        \
+cxx\serializer\validating\boolean.cxx               \
+cxx\serializer\validating\byte.cxx                  \
+cxx\serializer\validating\unsigned-byte.cxx         \
+cxx\serializer\validating\short.cxx                 \
+cxx\serializer\validating\unsigned-short.cxx        \
+cxx\serializer\validating\int.cxx                   \
+cxx\serializer\validating\unsigned-int.cxx          \
+cxx\serializer\validating\integer.cxx               \
+cxx\serializer\validating\negative-integer.cxx      \
+cxx\serializer\validating\non-positive-integer.cxx  \
+cxx\serializer\validating\positive-integer.cxx      \
+cxx\serializer\validating\non-negative-integer.cxx  \
+cxx\serializer\validating\float.cxx                 \
+cxx\serializer\validating\double.cxx                \
+cxx\serializer\validating\decimal.cxx
+
+!if "$(XSDE_LONGLONG)" == "y"
+src = $(src)                                        \
+cxx\serializer\validating\long-long.cxx             \
+cxx\serializer\validating\unsigned-long-long.cxx
+!else
+src = $(src)                                        \
+cxx\serializer\validating\long.cxx                  \
+cxx\serializer\validating\unsigned-long.cxx
+!endif
+
+!if "$(XSDE_STL)" == "y"
+
+src = $(src)                                        \
+cxx\serializer\validating\any-simple-type-stl.cxx   \
+cxx\serializer\validating\string-stl.cxx            \
+cxx\serializer\validating\normalized-string-stl.cxx \
+cxx\serializer\validating\token-stl.cxx             \
+cxx\serializer\validating\name-stl.cxx              \
+cxx\serializer\validating\nmtoken-stl.cxx           \
+cxx\serializer\validating\ncname-stl.cxx            \
+cxx\serializer\validating\id-stl.cxx                \
+cxx\serializer\validating\idref-stl.cxx             \
+cxx\serializer\validating\language-stl.cxx          \
+cxx\serializer\validating\uri-stl.cxx               \
+cxx\serializer\validating\idrefs-stl.cxx            \
+cxx\serializer\validating\nmtokens-stl.cxx          \
+cxx\serializer\validating\qname-stl.cxx
+
+!else
+
+src = $(src)                                     \
+cxx\serializer\validating\any-simple-type.cxx    \
+cxx\serializer\validating\string.cxx             \
+cxx\serializer\validating\normalized-string.cxx  \
+cxx\serializer\validating\token.cxx              \
+cxx\serializer\validating\name.cxx               \
+cxx\serializer\validating\nmtoken.cxx            \
+cxx\serializer\validating\ncname.cxx             \
+cxx\serializer\validating\id.cxx                 \
+cxx\serializer\validating\idref.cxx              \
+cxx\serializer\validating\language.cxx           \
+cxx\serializer\validating\uri.cxx                \
+cxx\serializer\validating\idrefs.cxx             \
+cxx\serializer\validating\nmtokens.cxx           \
+cxx\serializer\validating\qname.cxx
+
+!endif # stl
+
+src = $(src)                                     \
+cxx\serializer\validating\base64-binary.cxx      \
+cxx\serializer\validating\hex-binary.cxx         \
+cxx\serializer\validating\gday.cxx               \
+cxx\serializer\validating\gmonth.cxx             \
+cxx\serializer\validating\gyear.cxx              \
+cxx\serializer\validating\gmonth-day.cxx         \
+cxx\serializer\validating\gyear-month.cxx        \
+cxx\serializer\validating\date.cxx               \
+cxx\serializer\validating\time.cxx               \
+cxx\serializer\validating\date-time.cxx          \
+cxx\serializer\validating\duration.cxx
+
+!else # validation
+
+src = $(src)                                            \
+cxx\serializer\non-validating\serializer.cxx            \
+cxx\serializer\non-validating\time-zone.cxx             \
+cxx\serializer\non-validating\xml-schema-sskel.cxx
+
+src = $(src)                                            \
+cxx\serializer\non-validating\boolean.cxx               \
+cxx\serializer\non-validating\byte.cxx                  \
+cxx\serializer\non-validating\unsigned-byte.cxx         \
+cxx\serializer\non-validating\short.cxx                 \
+cxx\serializer\non-validating\unsigned-short.cxx        \
+cxx\serializer\non-validating\int.cxx                   \
+cxx\serializer\non-validating\unsigned-int.cxx          \
+cxx\serializer\non-validating\integer.cxx               \
+cxx\serializer\non-validating\negative-integer.cxx      \
+cxx\serializer\non-validating\non-positive-integer.cxx  \
+cxx\serializer\non-validating\positive-integer.cxx      \
+cxx\serializer\non-validating\non-negative-integer.cxx  \
+cxx\serializer\non-validating\float.cxx                 \
+cxx\serializer\non-validating\double.cxx                \
+cxx\serializer\non-validating\decimal.cxx
+
+!if "$(XSDE_LONGLONG)" == "y"
+src = $(src)                                            \
+cxx\serializer\non-validating\long-long.cxx             \
+cxx\serializer\non-validating\unsigned-long-long.cxx
+!else
+src = $(src)                                            \
+cxx\serializer\non-validating\long.cxx                  \
+cxx\serializer\non-validating\unsigned-long.cxx
+!endif
+
+!if "$(XSDE_STL)" == "y"
+
+src = $(src)                                            \
+cxx\serializer\non-validating\any-simple-type-stl.cxx   \
+cxx\serializer\non-validating\string-stl.cxx            \
+cxx\serializer\non-validating\normalized-string-stl.cxx \
+cxx\serializer\non-validating\token-stl.cxx             \
+cxx\serializer\non-validating\name-stl.cxx              \
+cxx\serializer\non-validating\nmtoken-stl.cxx           \
+cxx\serializer\non-validating\ncname-stl.cxx            \
+cxx\serializer\non-validating\id-stl.cxx                \
+cxx\serializer\non-validating\idref-stl.cxx             \
+cxx\serializer\non-validating\language-stl.cxx          \
+cxx\serializer\non-validating\uri-stl.cxx               \
+cxx\serializer\non-validating\idrefs-stl.cxx            \
+cxx\serializer\non-validating\nmtokens-stl.cxx          \
+cxx\serializer\non-validating\qname-stl.cxx
+
+!else
+
+src = $(src)                                         \
+cxx\serializer\non-validating\any-simple-type.cxx    \
+cxx\serializer\non-validating\string.cxx             \
+cxx\serializer\non-validating\normalized-string.cxx  \
+cxx\serializer\non-validating\token.cxx              \
+cxx\serializer\non-validating\name.cxx               \
+cxx\serializer\non-validating\nmtoken.cxx            \
+cxx\serializer\non-validating\ncname.cxx             \
+cxx\serializer\non-validating\id.cxx                 \
+cxx\serializer\non-validating\idref.cxx              \
+cxx\serializer\non-validating\language.cxx           \
+cxx\serializer\non-validating\uri.cxx                \
+cxx\serializer\non-validating\idrefs.cxx             \
+cxx\serializer\non-validating\nmtokens.cxx           \
+cxx\serializer\non-validating\qname.cxx
+
+!endif # stl
+
+src = $(src)                                         \
+cxx\serializer\non-validating\base64-binary.cxx      \
+cxx\serializer\non-validating\hex-binary.cxx         \
+cxx\serializer\non-validating\gday.cxx               \
+cxx\serializer\non-validating\gmonth.cxx             \
+cxx\serializer\non-validating\gyear.cxx              \
+cxx\serializer\non-validating\gmonth-day.cxx         \
+cxx\serializer\non-validating\gyear-month.cxx        \
+cxx\serializer\non-validating\date.cxx               \
+cxx\serializer\non-validating\time.cxx               \
+cxx\serializer\non-validating\date-time.cxx          \
+cxx\serializer\non-validating\duration.cxx
+
+!endif # validation
+
+
+#
+#
+obj = $(src:.cxx=.obj)
+obj = $(obj:.c=.obj)
+
+
+# Build.
+#
+xsde.lib: $(obj)
+	$(AR) $(ARFLAGS) /OUT:$@ $**
+!if "$(RANLIB)" != ""
+	$(RANLIB) $@
+!endif
+
+$(obj): config.h
+
+config.h: $(root)\config\config.nmake
+	@echo generating config.h
+	@echo /* Generated - do not edit. */       >$@
+	@echo #ifndef XSDE_CONFIG_H               >>$@
+	@echo #define XSDE_CONFIG_H               >>$@
+!if "$(XSDE_PLATFORM)" == "wince"
+	@echo #define XSDE_PLATFORM_WINCE         >>$@
+!endif
+!if "$(XSDE_PLATFORM)" == "win32"
+	@echo #define XSDE_PLATFORM_WIN32         >>$@
+!endif
+!if "$(XSDE_PLATFORM)" == "posix"
+	@echo #define XSDE_PLATFORM_POSIX         >>$@
+!endif
+	@echo #define XSDE_ARCH_WIDTH $(XSDE_ARCH_WIDTH) >>$@
+!if "$(XSDE_BYTEORDER)" == "l"
+	@echo #define XSDE_BYTEORDER 1234         >>$@
+!endif
+!if "$(XSDE_BYTEORDER)" == "b"
+	@echo #define XSDE_BYTEORDER 4321         >>$@
+!endif
+!if "$(XSDE_ENCODING)" == "utf8"
+	@echo #define XSDE_ENCODING_UTF8          >>$@
+!else
+!if "$(XSDE_ENCODING)" == ""
+	@echo #define XSDE_ENCODING_UTF8          >>$@
+!else
+	@echo #undef XSDE_ENCODING_UTF8           >>$@
+!endif
+!endif
+!if "$(XSDE_ENCODING)" == "iso8859-1"
+	@echo #define XSDE_ENCODING_ISO8859_1     >>$@
+!else
+	@echo #undef XSDE_ENCODING_ISO8859_1      >>$@
+!endif
+!if "$(XSDE_STL)" == "y"
+	@echo #define XSDE_STL                    >>$@
+!endif
+!if "$(XSDE_STL_ITERATOR)" == "y"
+	@echo #define XSDE_STL_ITERATOR           >>$@
+!endif
+!if "$(XSDE_IOSTREAM)" == "y"
+	@echo #define XSDE_IOSTREAM               >>$@
+!endif
+!if "$(XSDE_EXCEPTIONS)" == "y"
+	@echo #define XSDE_EXCEPTIONS             >>$@
+!endif
+!if "$(XSDE_LONGLONG)" == "y"
+	@echo #define XSDE_LONGLONG               >>$@
+!endif
+!if "$(XSDE_SNPRINTF)" == "y"
+	@echo #define XSDE_SNPRINTF               >>$@
+!endif
+!if "$(XSDE_PARSER_VALIDATION)" == "y"
+	@echo #define XSDE_PARSER_VALIDATION      >>$@
+!endif
+!if "$(XSDE_SERIALIZER_VALIDATION)" == "y"
+	@echo #define XSDE_SERIALIZER_VALIDATION  >>$@
+!endif
+!if "$(XSDE_REGEXP)" == "y"
+	@echo #define REGEXP                      >>$@
+!endif
+!if "$(XSDE_REUSE_STYLE)" == "mixin"
+	@echo #define XSDE_REUSE_STYLE_MIXIN      >>$@
+!else
+	@echo #undef XSDE_REUSE_STYLE_MIXIN       >>$@
+!endif
+!if "$(XSDE_REUSE_STYLE)" == "tiein"
+	@echo #define XSDE_REUSE_STYLE_TIEIN      >>$@
+!else
+	@echo #undef XSDE_REUSE_STYLE_TIEIN       >>$@
+!endif
+!if "$(XSDE_REUSE_STYLE)" == "none"
+	@echo #define XSDE_REUSE_STYLE_NONE       >>$@
+!else
+	@echo #undef XSDE_REUSE_STYLE_NONE        >>$@
+!endif
+!if "$(XSDE_CUSTOM_ALLOCATOR)" == "y"
+	@echo #define XSDE_CUSTOM_ALLOCATOR       >>$@
+!endif
+!if "$(XSDE_DEFAULT_ALLOCATOR)" == "y"
+	@echo #define XSDE_DEFAULT_ALLOCATOR      >>$@
+!endif
+!if "$(XSDE_POLYMORPHIC)" == "y"
+	@echo #define XSDE_POLYMORPHIC            >>$@
+	@echo #define XSDE_PARSER_SMAP_BUCKETS $(XSDE_PARSER_SMAP_BUCKETS)UL >>$@
+!if "$(XSDE_PARSER_VALIDATION)" == "y"
+	@echo #define XSDE_PARSER_IMAP_BUCKETS $(XSDE_PARSER_IMAP_BUCKETS)UL >>$@
+!endif
+	@echo #define XSDE_SERIALIZER_SMAP_BUCKETS $(XSDE_SERIALIZER_SMAP_BUCKETS)UL >>$@
+	@echo #define XSDE_SERIALIZER_SMAP_BUCKET_BUCKETS $(XSDE_SERIALIZER_SMAP_BUCKET_BUCKETS)UL >>$@
+!if "$(XSDE_SERIALIZER_VALIDATION)" == "y"
+	@echo #define XSDE_SERIALIZER_IMAP_BUCKETS $(XSDE_SERIALIZER_IMAP_BUCKETS)UL >>$@
+!endif
+!else
+	@echo #undef XSDE_POLYMORPHIC             >>$@
+!endif
+	@echo #endif                              >>$@
+
+
+# Generated.
+#
+gen:
+
+
+# Test.
+#
+test: xsde.lib
+
+# Clean.
+#
+# Nmake that comes with eVC++ 4 cannot handle del $(obj)
+# because the resulting line is too long.
+#
+cleanobj:
+	-del xsde.lib config.h
+	-del c\expat\*.obj
+	-del c\genx\*.obj
+	-del c\regexp\*.obj
+	-del cxx\*.obj
+	-del cxx\parser\*.obj
+	-del cxx\parser\expat\*.obj
+!if "$(XSDE_PARSER_VALIDATION)" == "y"
+	-del cxx\parser\validating\*.obj
+!else
+	-del cxx\parser\non-validating\*.obj
+!endif
+	-del cxx\serializer\*.obj
+	-del cxx\serializer\genx\*.obj
+!if "$(XSDE_SERIALIZER_VALIDATION)" == "y"
+	-del cxx\serializer\validating\*.obj
+!else
+	-del cxx\serializer\non-validating\*.obj
+!endif
+
+clean: cleanobj
