@@ -40,9 +40,9 @@ This is how to compile the .xsd file included as example:
 
 which will generate:
 
-* `hello.hxx, hello.cxx` - object model files
-* `hello-pskel.hxx, hello-pskel.cxx` - parser skeletons files
-* `hello-pimpl.hxx, hello-pimpl.cxx` - parser implementation files
+* `hello.hxx`, `hello.cxx` - object model files
+* `hello-pskel.hxx`, `hello-pskel.cxx` - parser skeletons files
+* `hello-pimpl.hxx`, `hello-pimpl.cxx` - parser implementation files
     
 
 Any help in development is highly appreciated.
